@@ -47,6 +47,16 @@ func (rs *redisStore) Get(key string) (int, error) {
 	return int(op), nil
 }
 
+func (rs *redisStore) GetTTL(key string) (time.Duration, error) {
+	ctx := context.Background()
+	res := rs.client.TTL(ctx, key)
+	duration, err := res.Result()
+	if err != nil {
+		return 0, err
+	}
+	return duration, nil
+}
+
 func (rs *redisStore) Increment(key string) (int, error) {
 	ctx := context.Background()
 	res := rs.client.Incr(ctx, key)

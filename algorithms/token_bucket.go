@@ -14,11 +14,18 @@ type tokenBucket struct{}
 func (l *tokenBucket) IsVaidRequest() (*model.RateLimitResponse, error) {
 	// decrement token bucket , if output is zero return failed, else succes
 	storeInstance := store.Get()
+	// set retry after time
+	ttl, err := storeInstance.GetTTL(l.getKey())
+	if err != nil {
+		println(fmt.Sprintf("ERROR: fetching expiry ttl: %v", err))
+		return nil, err
+	}
 
 	resp := model.RateLimitResponse{
 		RemainingLimit: 0,
 		TotalLimit:     100,
-		RetryAfterSecs: 60,
+		RetryAfterSecs: int(ttl.Seconds()),
+		LimitExpired:   false,
 	}
 
 	oldVal, err := storeInstance.Get(l.getKey())
@@ -26,6 +33,7 @@ func (l *tokenBucket) IsVaidRequest() (*model.RateLimitResponse, error) {
 		return nil, err
 	}
 	if oldVal == 0 {
+		resp.LimitExpired = true
 		return &resp, nil
 	}
 	newVal, err := storeInstance.Decrement(l.getKey())

@@ -12,6 +12,7 @@ type Store interface {
 	Decrement(key string) (int, error)
 	Delete(key string) error
 	SetEx(key string, expiry time.Duration) error
+	GetTTL(key string) (time.Duration, error)
 }
 
 var once sync.Once

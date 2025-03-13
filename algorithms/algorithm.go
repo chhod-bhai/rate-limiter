@@ -20,6 +20,6 @@ func New(algorithmType model.AlgorithmType) Algorithm {
 	case model.SlidingWindowLog:
 		return NewSlidingWindowLog()
 	default:
-		return NewLeakyBucket()
+		return NewTokenBucket()
 	}
 }
